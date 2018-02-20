@@ -25,15 +25,11 @@ package com.elite;
 //		planets in current system
 //		space stations in current system
 
-import java.awt.*;
-//import java.awt.event.*;
 import java.io.*;
-import java.net.*;
-import java.util.*;
 
 
-class Universe
-{
+
+class Universe {
 	public	final	static	int	OBJ_NONE		=	0;
 	public	final	static	int	OBJ_STATION	=	1;
 	public	final	static	int	OBJ_PLANET	=	2;
@@ -42,16 +38,16 @@ class Universe
 
    // Character types
    public	final static	int	C_TRADER		=	0,
-   										C_MERCENARY	=	1,
-                                 C_PIRATE		=	2,
-                                 C_POLICE		=	3,
-                                 C_TRANSPORT	=	4,
-                                 C_MINER		=	5,
-                                 C_SCAVENGER	=	6,
-                                 C_KILLER		= 	7;
+   								C_MERCENARY	=	1,
+                                C_PIRATE		=	2,
+                                C_POLICE		=	3,
+                                C_TRANSPORT	=	4,
+                                C_MINER		=	5,
+                                C_SCAVENGER	=	6,
+                                C_KILLER = 	7;
                                  
    public	final static	int	CT_TRADER		=	1<<C_TRADER,
-   										CT_MERCENARY	=	1<<C_MERCENARY,
+   								CT_MERCENARY	=	1<<C_MERCENARY,
                                  CT_PIRATE		=	1<<C_PIRATE,
                                  CT_POLICE		=	1<<C_POLICE,
                                  CT_TRANSPORT	=	1<<C_TRANSPORT,
@@ -63,17 +59,16 @@ class Universe
    
 	public	int		CurrentGalaxy;
 
-	public	ModelThreeD	Model[]			=	new ModelThreeD[GameControl.NUM_3D_OBJS];
+	public	ModelThreeD	models[]			=	new ModelThreeD[GameControl.NUM_3D_OBJS];
 
-// Lists of objects
-	public	Objct		ShipFree			=	new Objct();			// Free ship pool.
-	public	Objct		ShipUsed			=	new Objct();			// Used ship list.
-	public	Objct		Bodies			=	new Objct();			//	List of stations/suns/planets in current system
+
+	public	LinkableObject		shipFree			=	new LinkableObject();			// Free ship pool.
+	public	LinkableObject		shipUsed			=	new LinkableObject();			// Used ship list.
+	public	LinkableObject		bodies			=	new LinkableObject();			//	List of stations/suns/planets in current system
 	
-	public	Part		PartFree			=	new Part();
-	public	Part		PartUsed			=	new Part();
+	public	Part		partFree			=	new Part();
+	public	Part		partUsed			=	new Part();
 	
-// Actual objects
 	public	Camera	camera				=	new Camera();
 	
 	public	ShipSimulator	ShipPlayer[]	=	new ShipSimulator[GameControl.NUM_PLAYERS];
@@ -82,15 +77,12 @@ class Universe
 	public	StationModel	Station			=	new StationModel();
 	public	SunThreeD		Sun				=	new SunThreeD();
 
-// Mouse/menu control variables - probably shouldn't be here, but what the hell.	
-	int		MouseX=0,
-				MouseY=0;
+	int	mouseX=0;
+	int mouseY=0;
 	boolean	MouseClick	=	false;
+	int	EquipState;
+	int EquipItem;
 
-	int		EquipState,
-				EquipItem;
-   
-// Event handling
 	int		iTimeSinceLastEvent;
 	
  	public void universe()
@@ -108,31 +100,28 @@ class Universe
    	CT_NAME[C_KILLER]		=	"Killer";
  	}
  	
- 	public void initStaticLists()
- 	{
+ 	private void initStaticLists() {
 		for(int i=0; i!=GameControl.NUM_PLANETS; i++)
 			planets[i]	=	new Planet();
 			
 		for(int i=0; i!=GameControl.NUM_3D_OBJS; i++)
-			Model[i]	=	new ModelThreeD();
+			models[i]	=	new ModelThreeD();
 		
 		for(int i=0; i!=GameControl.NUM_SHIPS; i++)
 		{
 			ShipSimulator	s	=	new ShipSimulator();
-			s.linkTo(ShipFree);
+			s.linkTo(shipFree);
 		}
 		
 		for(int i=0; i!=GameControl.NUM_PARTS; i++)
 		{
 			Part	p	=	new Part();
-			p.linkTo(PartFree);
-		}
-		
+			p.linkTo(partFree);
+		}		
  	}
  	
  	
- 	public void initialiseGalaxy()
- 	{
+ 	private void initialiseGalaxy() {
  		int	CG	=	CurrentGalaxy*10000;
  		
 		System.out.println("Creating Planets");
@@ -142,26 +131,28 @@ class Universe
  	}
  	
 
-	public void loadModels(URL codebase)
-	{ 	
-   	int	i;
+	private void loadModels() { 	
+   		
+	  int	i=0;
 
-		System.out.println("IDJ:"+codebase);
-
-      i	=	0;
-      while(GameControl.ModInfo[i].Name != null)
-      {
-        System.out.println("gfx"+java.io.File.separator+GameControl.ModInfo[i].Name+".dat");
-      	//Model[i].load(codebase, "gfx"+java.io.File.separator+gamecon.ModInfo[i].Name+".dat");
-        Model[i].load(codebase, "gfx/"+GameControl.ModInfo[i].Name+".dat");
+      while(GameControl.modelInfo[i].name != null) {
+        System.out.println("gfx"+java.io.File.separator+GameControl.modelInfo[i].name+".dat");  
+        InputStream is = this.getClass().getResourceAsStream("/gfx/"+GameControl.modelInfo[i].name+".dat");
+        models[i].load(is);
          i++;
       }
+	}
+	
+	public void init() {
+		initStaticLists();
+		initialiseGalaxy();
+		loadModels();
 	}
 	
 	public void clearLists(boolean ClearPlayer)
 	{
 		// Clear used ship list - except player ships
-		Objct	s	=	ShipUsed.Next,
+		LinkableObject	s	=	shipUsed.Next,
 						sNext;
 		
 		while(s!=null)
@@ -170,12 +161,12 @@ class Universe
 			if((ClearPlayer	|| !((ShipSimulator)s).PlayerCraft)
 			&&	s.type!=OBJ_STATION)
 			{
-				s.linkTo(ShipFree);
+				s.linkTo(shipFree);
 			}
 			s	=	sNext;
 		}
 		
-		s	=	Bodies.Next;
+		s	=	bodies.Next;
 		while(s!=null)
 		{
 			sNext	=	s.Next;
@@ -183,11 +174,11 @@ class Universe
 			s	=	sNext;
 		}
 		
-		s	=	PartUsed.Next;
+		s	=	partUsed.Next;
 		while(s!=null)
 		{
 			sNext	=	s.Next;
-			s.linkTo(PartFree);
+			s.linkTo(partFree);
 			s	=	sNext;
 		}
 		
@@ -196,7 +187,7 @@ class Universe
 	
 	public ShipSimulator getShip()
 	{
-		return((ShipSimulator) ShipFree.Next);
+		return((ShipSimulator) shipFree.Next);
 	}
 
 	public void event()
@@ -210,34 +201,34 @@ class Universe
 			{  
 				MatrixMath43	mat	=	new MatrixMath43(),
 							mat2	=	new MatrixMath43();
-				Vectr		off	=	new Vectr(0,0,40000);
+				Vector		off	=	new Vector(0,0,40000);
 				
 				s.defaults(GameControl.CobraIII);
 
             int ship;
             do{
    				ship  =  (int)(Math.abs(Math.random()*GameControl.MAX_MODELS));
-               }while(GameControl.ModInfo[ship].BaseOccupation==0);
+               }while(GameControl.modelInfo[ship].baseOccupation==0);
                        
-            System.out.println("Created ship model: "+GameControl.ModInfo[ship].Name);
+            	System.out.println("Created ship model: "+GameControl.modelInfo[ship].name);
             
-				s.mod(Model[ship]);
-				s.Position.copy(ShipPlayer[0].Position);
+				s.setModel(models[ship]);
+				s.position.copy(ShipPlayer[0].position);
 				mat2.rotY((float)(Math.random()*Math.PI));
 				mat.rotZ((float)(Math.random()*Math.PI));
 				mat.mul(mat2);
 				off.mul(mat);
-				s.Position.add(off);
+				s.position.add(off);
 
 				// Setup AI inf
 				double	job	=	Math.abs(Math.random());
 			
-					//s.AIattack(ShipPlayer[0]); // MOD - Do not attack my ship
+				s.AIattack(ShipPlayer[0]); // MOD - Do not attack my ship
           //s.AIfollow(ShipPlayer[0]);
    
 
 
-				s.linkTo(ShipUsed);
+				s.linkTo(shipUsed);
 			}
 			
 			eventOccurred	=	true;

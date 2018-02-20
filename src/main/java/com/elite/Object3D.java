@@ -19,96 +19,94 @@ package com.elite;
 // Simple 3d object class
 
 import java.awt.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 
-class Object3D extends Objct
+class Object3D extends LinkableObject
 {
-	public	Vectr		Position		= new Vectr();
-	public	Vectr		Angle			= new Vectr();
-	public	Vectr		RenderPos	= new Vectr();
-	public	Vectr		Movement		= new Vectr();
-  public	MatrixMath43	Mat =	new MatrixMath43();
-	private	Vectr		Min	=	new Vectr();
-	private	Vectr		Max	=	new Vectr();
-	public	int		Col;
-	public	Color		Colour;
-	public	float		Size;	// For planets/suns
-	private	ModelThreeD	mod;
+	public	Vector		position		= new Vector();
+	public	Vector		angle			= new Vector();
+	public	Vector		renderPos		= new Vector();
+	public	Vector		movement		= new Vector();
+	public	MatrixMath43 matrix =	new MatrixMath43();
+	private	Vector		min	=	new Vector();
+	private	Vector		max	=	new Vector();
+	public	int			col;
+	public	Color		colour;
+	public	float		size;	// For planets/suns
+	private	ModelThreeD	model;
 
 
-	public void dupe(Object3D o)	// Duplicate basic 3d obj info (not links)
-	{
-		Position.copy(o.Position);
-		Angle.copy(o.Angle);	// Shouldn't be used
-		Mat.copy(o.Mat);
-		Min.copy(o.Min);		// Just for bounding box display
-		Max.copy(o.Max);		// ditto
-		Col		=	o.Col;
-		Colour	=	o.Colour;
-		mod		=	o.mod;
+	/**
+	 * Duplicate basic 3d obj info (not links)
+	 * 
+	 * @param o
+	 */
+	public void duplicate(Object3D o) {
+		position.copy(o.position);
+		angle.copy(o.angle);	// Shouldn't be used
+		matrix.copy(o.matrix);
+		min.copy(o.min);		// Just for bounding box display
+		max.copy(o.max);		// ditto
+		col		=	o.col;
+		colour	=	o.colour;
+		model		=	o.model;
 	}
 	
 
 	Object3D()
 	{
-		mod	=	null;
+		model	=	null;
 	}
 	
-   public void mod(ModelThreeD mod)
-   {
-   	this.mod	=	mod;
+   public void setModel(ModelThreeD mod) {
+   	this.model	=	mod;
    	if(mod==null)
    		return;
    		
-		Min.copy(mod.Min);
-		Max.copy(mod.Max);
+		min.copy(mod.Min);
+		max.copy(mod.Max);
    }
 
-	public ModelThreeD mod()
-	{
-		return(this.mod);
+	public ModelThreeD getModel() {
+		return(this.model);
 	}
    
-   public void pos(float x, float y, float z)
-   {
-   	Position.x	=	x;
-   	Position.y	=	y;
-   	Position.z	=	z;
+   public void setPosition(float x, float y, float z) {
+   	position.x	=	x;
+   	position.y	=	y;
+   	position.z	=	z;
    }
    
    public void ang(float x, float y, float z)
    {
-   	Angle.x	=	x;
-   	Angle.y	=	y;
-   	Angle.z	=	z;
+   	angle.x	=	x;
+   	angle.y	=	y;
+   	angle.z	=	z;
    }
 
   	public void randomColour()
 	{
-		Col	=	(int)(Math.random()*8);
-		if(Col<1)	Col	=	1;
-		if(Col>7)	Col	=	7;
+		col	=	(int)(Math.random()*8);
+		if(col<1)	col	=	1;
+		if(col>7)	col	=	7;
 
 		int	c=0;
 
-		if((Col&1)!=0)	c	+=	255;
-		if((Col&2)!=0)	c	+=	255*256;
-		if((Col&4)!=0)	c	+=	255*65536;
-		Colour	=	new Color(c);
+		if((col&1)!=0)	c	+=	255;
+		if((col&2)!=0)	c	+=	255*256;
+		if((col&4)!=0)	c	+=	255*65536;
+		colour	=	new Color(c);
 	}
 	
 
 // Collision code follows - should create obj3dcoll class at some stage
 // For laser read ray/vector
 // For ship read object
-	public int	collideWithVec(Vectr Pos, Vectr Dir)
+	public int	collideWithVec(Vector Pos, Vector Dir)
 	{
-		Vectr	p = new Vectr(Pos),
-				d = new Vectr(Dir),
-				v = new Vectr();
+		Vector	p = new Vector(Pos),
+				d = new Vector(Dir),
+				v = new Vector();
 
 		MatrixMath43	m = new MatrixMath43();
 
@@ -116,8 +114,8 @@ class Object3D extends Objct
 
 		boolean	bHit	=	false;
 
-		m.affineInverse(this.Mat);
-		p.sub(this.Position);
+		m.affineInverse(this.matrix);
+		p.sub(this.position);
 
 		// make rays source and direction relative to ship
 		p.mul(m);
@@ -129,23 +127,23 @@ class Object3D extends Objct
 		if(d.z != 0)
 		{
 			// find where ray intersects plane z = Min.z i.e. p.z+t*d.z = Min.z, t = (Min.z-p.z)/d.z
-			t		=	(Min.z-p.z)/d.z;
+			t		=	(min.z-p.z)/d.z;
 			if(t>0)	// Laser has specific dir
 			{
 				v.x	=	p.x+t*d.x;
 				v.y	=	p.y+t*d.y;
 
-				if(v.x>Min.x && v.x<Max.x && v.y>Min.y && v.y<Max.y)
+				if(v.x>min.x && v.x<max.x && v.y>min.y && v.y<max.y)
 					bHit	=	true;
 				else
 				{
 					// z = Max.z
-					t		=	(Max.z-p.z)/d.z;
+					t		=	(max.z-p.z)/d.z;
 					if(t>0)	// Laser has specific dir
 					{
 						v.x	=	p.x+t*d.x;
 						v.y	=	p.y+t*d.y;
-						if(v.x>Min.x && v.x<Max.x && v.y>Min.y && v.y<Max.y)
+						if(v.x>min.x && v.x<max.x && v.y>min.y && v.y<max.y)
 							bHit	=	true;
 					}
 				}
@@ -155,23 +153,23 @@ class Object3D extends Objct
 		if(d.x != 0 && !bHit)
 		{
 			// x = Min.x
-			t		=	(Min.x-p.x)/d.x;
+			t		=	(min.x-p.x)/d.x;
 			if(t>0)	// Laser has specific dir
 			{
 				v.y	=	p.y+t*d.y;
 				v.z	=	p.z+t*d.z;
 
-				if(v.z>Min.z && v.z<Max.z && v.y>Min.y && v.y<Max.y)
+				if(v.z>min.z && v.z<max.z && v.y>min.y && v.y<max.y)
 					bHit	=	true;
 				else
 				{
 					// x = Max.x
-					t		=	(Max.x-p.x)/d.x;
+					t		=	(max.x-p.x)/d.x;
 					if(t>0)	// Laser has specific dir
 					{
 						v.y	=	p.y+t*d.y;
 						v.z	=	p.z+t*d.z;
-						if(v.z>Min.z && v.z<Max.z && v.y>Min.y && v.y<Max.y)
+						if(v.z>min.z && v.z<max.z && v.y>min.y && v.y<max.y)
 							bHit	=	true;
 					}
 				}
@@ -181,23 +179,23 @@ class Object3D extends Objct
 		if(d.y != 0 && !bHit)
 		{
 			// y = Min.y
-			t		=	(Min.y-p.y)/d.y;
+			t		=	(min.y-p.y)/d.y;
 			if(t>0)	// Laser has specific dir
 			{
 				v.x	=	p.x+t*d.x;
 				v.z	=	p.z+t*d.z;
 
-				if(v.z>Min.z && v.z<Max.z && v.x>Min.x && v.x<Max.x)
+				if(v.z>min.z && v.z<max.z && v.x>min.x && v.x<max.x)
 					bHit	=	true;
 				else
 				{
 					// y = Max.y
-					t		=	(Max.y-p.y)/d.y;
+					t		=	(max.y-p.y)/d.y;
 					if(t>0)	// Laser has specific dir
 					{
 						v.x	=	p.x+t*d.x;
 						v.z	=	p.z+t*d.z;
-						if(v.z>Min.z && v.z<Max.z && v.x>Min.x && v.x<Max.x)
+						if(v.z>min.z && v.z<max.z && v.x>min.x && v.x<max.x)
 							bHit	=	true;
 					}
 				}

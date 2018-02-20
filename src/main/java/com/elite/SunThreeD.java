@@ -40,9 +40,9 @@ class SunThreeD extends Object3D
 	public	void	setup(int iSeed)
 	{
 		Rand.setSeed(iSeed);
-		Position.z	=	-200000;	//	 This is really hyperspace dependant
-		Size			=	10000 + rand(10) * 10000;
-		this.Colour	=	Color.yellow;
+		position.z	=	-200000;	//	 This is really hyperspace dependant
+		size			=	10000 + rand(10) * 10000;
+		this.colour	=	Color.yellow;
 	}
 
 	private	int rand(int iMax)

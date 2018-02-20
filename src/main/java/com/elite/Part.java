@@ -24,91 +24,76 @@ import java.net.*;
 import java.util.*;
 
 
-class Part extends Objct
-{
-	public	Vectr		Position		= new Vectr();
-	public	Vectr		Angle			= new Vectr();
-
-	public	Vectr		RenderPos	= new Vectr();
+class Part extends LinkableObject {
+	public	Vector		position = new Vector();
+	public	Vector		angle = new Vector();
+	public	Vector		renderPos = new Vector();
+	public	Vector		movement = new Vector();
+	public	MatrixMath43 matrix = new MatrixMath43();
+	public	int	col;
+	public	Color colour;	
+	public	Vector move = new Vector();
+	public	int	life;
 	
-	public	Vectr		Movement		= new Vectr();
-
-   public	MatrixMath43	Mat =	new MatrixMath43();
-   
-	public	int		Col;
-	public	Color		Colour;
-	
-	public	Vectr		Move		= new Vectr();
-	public	int		Life;
-	
-	Part()
-	{
-		Life	=	0;
-		Col	=	3;
+	Part() {
+		life =	0;
+		col	=	3;
 	}
 
-	public void setup(MatrixMath43 m, Vectr Pos)
-	{
-		Mat.copy(m);
-		Move.set(0f,10f,-100f);
-		Move.mul(Mat);
-						
-		Position.copy(Pos);
-		
-		Life	=	16;
+	public void setup(MatrixMath43 m, Vector Pos) {
+		matrix.copy(m);
+		move.set(0f,10f,-100f);
+		move.mul(matrix);				
+		position.copy(Pos);	
+		life	=	16;
 	}
 	
 	// Draw object into order table
-	public void render(Universe uni, Polygon OrderTable[], Polygon PolyFree, Vectr light, MatrixMath43 m)
-	{
+	public void render(Universe uni, Polygon OrderTable[], Polygon PolyFree, Vector light, MatrixMath43 m) {
 		MatrixMath43	m2 = new MatrixMath43();
-		Vectr		v	= new Vectr();
+		Vector		v	= new Vector();
 
-		Life--;
+		life--;
 		
-		if(Life==0)
-		{
-			linkTo(uni.PartFree);
+		if(life==0) {
+			linkTo(uni.partFree);
 			return;
 		}
 
-		Position.add(Move);
+		position.add(move);
 	
 	// Can now use m2 for lighting purposes
 		m2.copy(m);
 		m2.trans(0,0,0);
 
-		int	x[] = new int[4],
-				y[] = new int[4];
+		int	x[] = new int[4];
+		int y[] = new int[4];
 	
-		Polygon	p	=	PolyFree.Next;
+		Polygon	p = PolyFree.Next;
 	
 		if(p == null)
 			return;
 			
 		boolean	drawFlag	=	true;
 		
-		v.copy(Position);
-		v.sub(uni.camera.Position);
+		v.copy(position);
+		v.sub(uni.camera.position);
 		v.mul(m);
 				
-		if(v.z < (GameControl.PERSPECTIVE_H/2))
-		{
+		if(v.z < (GameControl.PERSPECTIVE_H/2)) {
 			// -ve z check; i.e. should clip with z=0 (or similar)
 			//drawFlag	=	false;
 			return;
 		}
 		
-		if(SceneRenderer.fovClip(v))
-		{
+		if(SceneRenderer.fovClip(v)) {
 			return;
 		}
 				
-		int	iOT	=	v.pers();
+		int	iOT	= v.pers();
 		
 	
-		if(drawFlag)
-		{
+		if(drawFlag) {
 			p.x[0]	=	v.sX;
 			p.y[0]	=	v.sY;
 			
@@ -119,7 +104,7 @@ class Part extends Objct
 			//		colour	=	0;
 
 			int	colour		=	0,
-					Intensity	=	(Life*16);
+					Intensity	=	(life*16);
 					
 			if(Intensity<0)	Intensity	=	0;
 			if(Intensity>255)	Intensity	=	255;

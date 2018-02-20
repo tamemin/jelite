@@ -21,12 +21,12 @@ import java.awt.*;
 
 class ShipSimulator extends Object3D
 {
-	public Vectr		Rcur	=	new Vectr();
-	public Vectr		Rmax	=	new Vectr();
-	public Vectr		Rtar	=	new Vectr();
+	public Vector		Rcur	=	new Vector();
+	public Vector		Rmax	=	new Vector();
+	public Vector		Rtar	=	new Vector();
 	
-	public Vectr		Radjust	=	new Vectr();
-	public Vectr		Rdampen	=	new Vectr();
+	public Vector		Radjust	=	new Vector();
+	public Vector		Rdampen	=	new Vector();
 	
 	public float	fSpeedCur;
 	public float	fSpeedMax;
@@ -106,12 +106,12 @@ class ShipSimulator extends Object3D
 
 	public void defaults(int iShipType)
 	{
-		Position.zero();
-		Angle.zero();
-		RenderPos.zero();
+		position.zero();
+		angle.zero();
+		renderPos.zero();
 		Rtar.zero();
 		Rcur.zero();
-		Mat.unit();
+		matrix.unit();
 
 		ShipType	=	iShipType;
 
@@ -271,15 +271,15 @@ class ShipSimulator extends Object3D
     public void run(Universe Uni)
     {
       MatrixMath43	m	=	new MatrixMath43(), m2	=	new MatrixMath43();
-      Vectr	thrust	=	new Vectr();
+      Vector	thrust	=	new Vector();
       
       if(GameControl.bPart && !PlayerCraft)
       {
-        Part	p	=	(Part)Uni.PartFree.Next;
+        Part	p	=	(Part)Uni.partFree.Next;
         if(p != null)
         {
-          p.linkTo(Uni.PartUsed);
-          p.setup(Mat, Position);
+          p.linkTo(Uni.partUsed);
+          p.setup(matrix, position);
         }
       } 	
       // Energy replenishment
@@ -332,9 +332,9 @@ class ShipSimulator extends Object3D
             case  AI_FLY_AWAY:
               if(iTimeInState<400)
               {
-                Vectr	vecTar	=	new Vectr(Position);
-                vecTar.sub(shipTar.Position);
-                vecTar.add(Position);
+                Vector	vecTar	=	new Vector(position);
+                vecTar.sub(shipTar.position);
+                vecTar.add(position);
                 fSpeedTar   =  fSpeedMax*0.8f;
             		followVec(vecTar);
               }
@@ -353,23 +353,23 @@ class ShipSimulator extends Object3D
       if(Rcur.z!=0)
       {
         thrust.set(0f,0f,1f);
-        thrust.mul(Mat);
+        thrust.mul(matrix);
         m.rotateAbout(thrust, -Rcur.z);
-        Mat.mul(m);
+        matrix.mul(m);
       }
       if(Rcur.x!=0)
       {
         thrust.set(1f,0f,0f);
-        thrust.mul(Mat);
+        thrust.mul(matrix);
         m.rotateAbout(thrust, -Rcur.x);
-        Mat.mul(m);       
+        matrix.mul(m);       
       }
       if(Rcur.y!=0)
       {
         thrust.set(0f,1f,0f);
-        thrust.mul(Mat);
+        thrust.mul(matrix);
         m.rotateAbout(thrust, -Rcur.y);
-        Mat.mul(m);
+        matrix.mul(m);
       }
       // Ensure minimum speed for ships
       if(fSpeedTar<4) fSpeedTar	=	4;
@@ -377,15 +377,15 @@ class ShipSimulator extends Object3D
       if(fSpeedCur != 0)
       {
         thrust.set(0f,0f,(float)fSpeedCur);
-        thrust.mul(Mat);
-        Position.add(thrust);
-        Movement.copy(thrust);
+        thrust.mul(matrix);
+        position.add(thrust);
+        movement.copy(thrust);
       }
-      else Movement.set(0f,0f,0f);
+      else movement.set(0f,0f,0f);
       // ****************
       // Handle weaponary   		
       // ****************
-      Vectr	laserDir	=	new Vectr();
+      Vector	laserDir	=	new Vector();
       int	View;		
       if(!PlayerCraft)
       {
@@ -424,22 +424,22 @@ class ShipSimulator extends Object3D
       if(bShoot || MissileState == 1)
       {  
         // Let's see if we're pointing at another ship?
-        Vectr	dis	=	new Vectr();
+        Vector	dis	=	new Vector();
         float BestDist = Float.MAX_VALUE, Dist;
         int	BestColValue = 0;
         sBest =	null;
-        laserDir.mul(Mat);
-        ShipSimulator s	=	(ShipSimulator)Uni.ShipUsed.Next;
+        laserDir.mul(matrix);
+        ShipSimulator s	=	(ShipSimulator)Uni.shipUsed.Next;
         while(s!=null)
         {
           if(s!=this)
           {
-            dis.copy(Position);
-            dis.sub(s.Position);
+            dis.copy(position);
+            dis.sub(s.position);
             Dist	=	dis.size();
             if(Dist<BestDist)
             {
-              int	ColValue	=	s.collideWithVec(Position, laserDir);
+              int	ColValue	=	s.collideWithVec(position, laserDir);
               if(ColValue != 0)
               {
                 BestDist			=	Dist;
@@ -469,7 +469,7 @@ class ShipSimulator extends Object3D
               }
               else
               {
-                sBest.linkTo(Uni.ShipFree);	// Perhaps, have an exploding ship list - Mmm.
+                sBest.linkTo(Uni.shipFree);	// Perhaps, have an exploding ship list - Mmm.
                 System.out.println("Enemy ship destroyed");
                 SoundEngine.playSound(1);
               }
@@ -485,28 +485,28 @@ class ShipSimulator extends Object3D
       if(bMissileFire && MissileState==2)
       {
         // Launch missile at enemy
-        ShipSimulator	s		=	(ShipSimulator) Uni.ShipFree.Next;
+        ShipSimulator	s		=	(ShipSimulator) Uni.shipFree.Next;
         if(s!=null)
         {
           NumMissiles--;
           MissileState		=	0;
           s.defaults(GameControl.Missile);
           s.followShip((ShipSimulator)MissileTarget);
-          s.Position.copy(Position);
-          s.Mat.copy(Mat);
-          s.mod(Uni.Model[2]);
+          s.position.copy(position);
+          s.matrix.copy(matrix);
+          s.setModel(Uni.models[2]);
           s.fSpeedCur	=	s.fSpeedMax;
-          s.linkTo(Uni.ShipUsed);
+          s.linkTo(Uni.shipUsed);
         }
       }
       // Are we near the space station? Then do bodged dock
-      Vectr	stat	=	new Vectr(Uni.Station.Position);
-      stat.sub(Position);
+      Vector	stat	=	new Vector(Uni.Station.position);
+      stat.sub(position);
       bStation	=	stat.size() < Uni.Station.RANGE;
       if(stat.size() < 200)
       {
         if(PlayerCraft) GameControl.CURRENT_MODE	=	GameControl.MODE_DOCK;
-        else linkTo(Uni.ShipFree);
+        else linkTo(Uni.shipFree);
       }
     }
 	public	boolean	damage(int ColValue, float Damage)
@@ -616,13 +616,13 @@ class ShipSimulator extends Object3D
 	{
 		boolean	jump	=	true;
 
-		Vectr	v		=	new Vectr();
+		Vector	v		=	new Vector();
 		
 		while(s != null)
 		{
 			if(s!=this)
 			{
-				v.sub(s.Position, this.Position);
+				v.sub(s.position, this.position);
 	         
 	         if(v.size() <= GameControl.SHIP_RANGE)
 	         {
@@ -636,9 +636,9 @@ class ShipSimulator extends Object3D
 		
 		if(jump)
 		{
-			Vectr thrust = new Vectr(0f,0f, 5000f);
-	  		thrust.mul(Mat);
-	  		Position.add(thrust);
+			Vector thrust = new Vector(0f,0f, 5000f);
+	  		thrust.mul(matrix);
+	  		position.add(thrust);
 	  	}
 	}
 	
@@ -670,7 +670,7 @@ class ShipSimulator extends Object3D
 	private float followShip()
 	{
 		float	Dist;
-		Vectr	vecTar	=	new Vectr(shipTar.Position);
+		Vector	vecTar	=	new Vector(shipTar.position);
 		
 		Dist	=	followVec(vecTar);
 		return(Dist);
@@ -678,16 +678,16 @@ class ShipSimulator extends Object3D
 	
 	private void followStation()
 	{
-		Vectr	vecTar	=	new Vectr(stationTar.Position);
+		Vector	vecTar	=	new Vector(stationTar.position);
 		followVec(vecTar);
 	}
 	
-	private float followVec(Vectr vecTar)
+	private float followVec(Vector vecTar)
 	{
-		MatrixMath43	mat	=	new MatrixMath43(Mat);
+		MatrixMath43	mat	=	new MatrixMath43(matrix);
 		
 		mat.affineInverse();
-		vecTar.sub(this.Position);
+		vecTar.sub(this.position);
 		
 		float	Dist	=	vecTar.size();
 		
@@ -750,13 +750,13 @@ class ShipSimulator extends Object3D
 		return(Dist);
 	}
 
-	public void debugInfo(Graphics g, Vectr vecTarO, int x, int y)
+	public void debugInfo(Graphics g, Vector vecTarO, int x, int y)
 	{
-		Vectr		vecTar	=	new Vectr(vecTarO);
-		MatrixMath43	mat		=	new MatrixMath43(Mat);
+		Vector		vecTar	=	new Vector(vecTarO);
+		MatrixMath43	mat		=	new MatrixMath43(matrix);
 		
 		mat.affineInverse();
-		vecTar.sub(this.Position);
+		vecTar.sub(this.position);
 		vecTar.mul(mat);
 		
 		float ang2	=	Utils.atan(vecTar.y, vecTar.z);

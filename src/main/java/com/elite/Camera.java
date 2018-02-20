@@ -31,23 +31,23 @@ class	Camera extends Object3D
 		Target	=	tar;
 	}
 	
-   public void pos(Vectr v)
+   public void pos(Vector v)
    {
-   	Movement.copy(v);
-   	Movement.sub(Position);
-   	Position.copy(v);
+   	movement.copy(v);
+   	movement.sub(position);
+   	position.copy(v);
    }
    
-   public void ang(Vectr v)
+   public void ang(Vector v)
    {
-   	Angle.copy(v);
+   	angle.copy(v);
    }
    
    public void copy(Camera cam)	// Just enough for rendering purposes
    {
-   	Position.copy(cam.Position);
-   	Angle.copy(cam.Angle);
-   	Mat.copy(cam.Mat);
+   	position.copy(cam.position);
+   	angle.copy(cam.angle);
+   	matrix.copy(cam.matrix);
    }
    
    public void update(ShipSimulator s)
@@ -61,37 +61,37 @@ class	Camera extends Object3D
    	MatrixMath43	m	=	new MatrixMath43();
    	MatrixMath43	m2	=	new MatrixMath43();
    	
-		pos(Target.Position);
+		pos(Target.position);
 		
    	if(Target.iView==2)
    	{
-	   	Vectr	v	=	new Vectr(0f,1f,0f);
-   		m.copy(Target.Mat);
+	   	Vector	v	=	new Vector(0f,1f,0f);
+   		m.copy(Target.matrix);
 			v.mul(m);
 			m2.rotateAbout(v, (float)(Math.PI));
 			m.mul(m2);
-			Mat.affineInverse(m);
+			matrix.affineInverse(m);
    	}
    	else if(Target.iView==3)
    	{
-	   	Vectr	v	=	new Vectr(0f,1f,0f);
-   		m.copy(Target.Mat);
+	   	Vector	v	=	new Vector(0f,1f,0f);
+   		m.copy(Target.matrix);
 			v.mul(m);
 			m2.rotateAbout(v, (float)(-Math.PI/2));
 			m.mul(m2);
-			Mat.affineInverse(m);
+			matrix.affineInverse(m);
    	}
    	else if(Target.iView==4)
    	{
-	   	Vectr	v	=	new Vectr(0f,1f,0f);
-   		m.copy(Target.Mat);
+	   	Vector	v	=	new Vector(0f,1f,0f);
+   		m.copy(Target.matrix);
 			v.mul(m);
 			m2.rotateAbout(v, (float)(Math.PI/2));
 			m.mul(m2);
-			Mat.affineInverse(m);
+			matrix.affineInverse(m);
    	}
    	else
-			Mat.affineInverse(Target.Mat);
+			matrix.affineInverse(Target.matrix);
    }
 }
 

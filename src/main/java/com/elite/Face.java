@@ -29,7 +29,7 @@ class	Face
 	public int	v[] = new int[MAX_V];
 	Color	c;
 
-	Vectr	normal = new Vectr();
+	Vector	normal = new Vector();
 
 	Face()
 	{

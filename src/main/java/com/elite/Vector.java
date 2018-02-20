@@ -18,26 +18,26 @@ package com.elite;
  ***************************************************************************/
 // 3D vector
 
-class Vectr
+class Vector
 {
 	public float	x,y,z;
 	public int		sX,sY;
 
-	Vectr()
+	Vector()
 	{
 		x	=	0;
 		y	=	0;
 		z	=	0;	
 	}
 
-	Vectr(float x, float y, float z)
+	Vector(float x, float y, float z)
 	{
 		this.x	=	x;
 		this.y	=	y;
 		this.z	=	z;	
 	}
 
-	Vectr(Vectr v)
+	Vector(Vector v)
 	{
 		x	=	v.x;
 		y	=	v.y;
@@ -58,7 +58,7 @@ class Vectr
 		this.z	=	z;	
 	}
 
-	public void copy(Vectr v)
+	public void copy(Vector v)
 	{
 		x	=	v.x;
 		y	=	v.y;
@@ -81,7 +81,7 @@ class Vectr
 		return((float)(Math.sqrt(x*x+y*y+z*z)));
 	}
 	 
-	public void add(Vectr v)
+	public void add(Vector v)
 	{
 		this.x	+=	v.x;
 		this.y	+=	v.y;
@@ -95,14 +95,14 @@ class Vectr
 		this.z	+=	z;
 	}
 	
-	public void sub(Vectr v)
+	public void sub(Vector v)
 	{
 		this.x	-=	v.x;
 		this.y	-=	v.y;
 		this.z	-=	v.z;
 	}
 
-	public void sub(Vectr v, Vectr v2)
+	public void sub(Vector v, Vector v2)
 	{
 		this.x	=	v.x-v2.x;
 		this.y	=	v.y-v2.y;
@@ -124,7 +124,7 @@ class Vectr
 		z	*=	s;
 	}
 
-	public void mul(Vectr v)
+	public void mul(Vector v)
 	{
 		float	x	=	this.x,
 				y	=	this.y,
@@ -135,7 +135,7 @@ class Vectr
 		this.z	=	x*v.y - y*v.x;
 	}
 	
-	public float dot(Vectr v)
+	public float dot(Vector v)
 	{
 		float dot;
 		dot	=	x*v.x + y*v.y + z*v.z;

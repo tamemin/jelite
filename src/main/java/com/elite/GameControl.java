@@ -21,25 +21,18 @@ package com.elite;
 // be declared global. Essentially, this class is used to pass miscellaneous
 // data between other classes the project uses.
 
-class GameControl
-{
+class GameControl {
 	
 	public static Planet planets[];
-
 	public final static boolean	bDebug = true;
-	public static boolean			bIE5mode = true;
-	
 	public final static float SHIP_RANGE	=	60000;
-	
 	public final static int SCREEN_WIDTH	=	640;
 	public final static int SCREEN_HEIGHT	=	480;
-
 	public final static int SCREEN_CEN_X	=	(SCREEN_WIDTH/2);
 	public final static int SCREEN_CEN_Y	=	(SCREEN_HEIGHT/2);
-
 	public final static int PERSPECTIVE_H	=	640;
-  public final static int EXPANSION_FACTOR = 4; // Added this to make things look much bigger when you get closer
-  public final static int Z_OFFSET = 800; // Added this to make sure objects remain visible until they are well behind the viewer
+	public final static int EXPANSION_FACTOR = 4; // Added this to make things look much bigger when you get closer
+	public final static int Z_OFFSET = 800; // Added this to make sure objects remain visible until they are well behind the viewer
 	public final static int NUM_3D_OBJS		=	32;
 	public final static int NUM_Z_BUCKETS	=	1024;
 	public final static int NUM_FREE_POLYS	=	4096;
@@ -47,15 +40,10 @@ class GameControl
 	public final static int NUM_STARS		=	100;
 	public final static int NUM_STARS_REL	=	100;
 	public final static int NUM_PLANETS		=	500;
-	public final static int NUM_PARTS		=	2000;
-	
-	public final static int NUM_SHIPS		=	4;
-	
+	public final static int NUM_PARTS		=	2000;	
+	public final static int NUM_SHIPS		=	4;	
 	public final static int MAX_DYNAMIC_OBJS	=	NUM_SHIPS;
-
-
-	public final static int NUM_PRODUCTS	=	17;
-	
+	public final static int NUM_PRODUCTS	=	17;	
 	public final static int MODE_TITLE		=	100;
 	public final static int MODE_START		=	200;
 	public final static int MODE_DOCKED		=	300;
@@ -69,13 +57,13 @@ class GameControl
 	public final static int CobraIII			=	0;
 	public final static int Missile			=	1;
 	
-	public static int			CURRENT_MODE	=	MODE_TITLE;
-	public static int			OLD_MODE			=	MODE_TITLE;
-	public static int			TIME_IN_MODE	=	0;
+	public static int CURRENT_MODE	=	MODE_TITLE;
+	public static int OLD_MODE		=	MODE_TITLE;
+	public static int TIME_IN_MODE	=	0;
 	
 	public static boolean	bFilled		=	true;
-	public static boolean	bPart			=	false; 
-	public static boolean	bBounding	=	true;
+	public static boolean	bPart		=	false; 
+	public static boolean	bBounding	=	false;
 	public static boolean	bDispHelp	=	false;
 	
 	public final static String VIEW[]	=	new String[11];
@@ -91,16 +79,14 @@ class GameControl
 	public final static String COLOURS[]	=	new String[32];
 	public final static String POLICE[]		=	new String[32];
 	public final static String MISC[]		=	new String[256];
-  public final static int	MAX_MODELS		=	32;
-	public final static ModelInfo ModInfo[]	=	new ModelInfo[MAX_MODELS];
+	public final static int	MAX_MODELS		=	32;
+	public final static ModelInfo modelInfo[]	=	new ModelInfo[MAX_MODELS];
 
 	public final static int		LaserRate[]		=	new int[4];
 	public final static int		LaserHeat[]		=	new int[4];
 	public final static int		LaserDamage[]	=	new int[4];
 
-	GameControl()
-	{
-	// Some, but not all initialisations will be done here
+	GameControl() {
 		
 		LaserRate[0]	=	5;
 		LaserRate[1]	=	4;
@@ -275,89 +261,88 @@ class GameControl
 		POLICE[2]	=	"Fugitive";
 		POLICE[3]	=	"Wanted (Dead or Alive)";
 
-      for(int i=0; i!=MAX_MODELS; i++)
-      {
-      	ModInfo[i]	=	new ModelInfo();
+      for(int i=0; i!=MAX_MODELS; i++) {
+      	modelInfo[i]	=	new ModelInfo();
       }
-  		ModInfo[ 0].Name   			=	"adder";
-      ModInfo[	0].BaseOccupation	=	Universe.CT_MERCENARY;
+  		modelInfo[0].name   			=	"adder";
+  		modelInfo[0].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[ 1].Name   			=	"anaconda";
-      ModInfo[	1].BaseOccupation	=	Universe.CT_MERCENARY;
+  		modelInfo[1].name   			=	"anaconda";
+  		modelInfo[1].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[ 2].Name   			=	"asp";
-      ModInfo[	2].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[2].name   			=	"asp";
+		modelInfo[2].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[ 3].Name   			=	"asteroid";
+		modelInfo[3].name   			=	"asteroid";
       
-		ModInfo[ 4].Name   			=	"barrel";
+		modelInfo[4].name   			=	"barrel";
       
-		ModInfo[ 5].Name   			=	"boa";
-      ModInfo[	5].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[5].name   			=	"boa";
+		modelInfo[5].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[ 6].Name   			=	"boulder";
+		modelInfo[6].name   			=	"boulder";
       
-		ModInfo[ 7].Name   			=	"capsule";
+		modelInfo[7].name   			=	"capsule";
       
-		ModInfo[ 8].Name   			=	"cobra";
-      ModInfo[	8].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[8].name   			=	"cobra";
+		modelInfo[8].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[ 9].Name   			=	"cobramk1";
-      ModInfo[	9].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[9].name   			=	"cobramk1";
+		modelInfo[9].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[10].Name   			=	"constrictor";
-      ModInfo[10].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[10].name   			=	"constrictor";
+		modelInfo[10].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[11].Name   			=	"coriolis";
+		modelInfo[11].name   			=	"coriolis";
       
-		ModInfo[12].Name   			=	"cougar";
-      ModInfo[12].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[12].name   			=	"cougar";
+		modelInfo[12].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[13].Name   			=	"dodo";
+		modelInfo[13].name   			=	"dodo";
       
-		ModInfo[14].Name   			=	"ferdelance";
-      ModInfo[14].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[14].name   			=	"ferdelance";
+		modelInfo[14].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[15].Name   			=	"gecko";
-      ModInfo[15].BaseOccupation	=	Universe.CT_MINER;
+		modelInfo[15].name   			=	"gecko";
+		modelInfo[15].baseOccupation	=	Universe.CT_MINER;
       
-		ModInfo[16].Name   			=	"krait";
-      ModInfo[16].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[16].name   			=	"krait";
+		modelInfo[16].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[17].Name   			=	"mamba";
-      ModInfo[17].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[17].name   			=	"mamba";
+		modelInfo[17].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[18].Name   			=	"missile";
+		modelInfo[18].name   			=	"missile";
       
-		ModInfo[19].Name   			=	"moray";
-      ModInfo[19].BaseOccupation	=	Universe.CT_MERCENARY;
+		modelInfo[19].name   			=	"moray";
+		modelInfo[19].baseOccupation	=	Universe.CT_MERCENARY;
       
-		ModInfo[20].Name   			=	"platelet";
+		modelInfo[20].name   			=	"platelet";
       
-		ModInfo[21].Name   			=	"python";
-      ModInfo[21].BaseOccupation	=	Universe.CT_TRADER;
+		modelInfo[21].name   			=	"python";
+		modelInfo[21].baseOccupation	=	Universe.CT_TRADER;
       
-		ModInfo[22].Name   			=	"shuttle";
-      ModInfo[22].BaseOccupation	=	Universe.CT_TRANSPORT;
+		modelInfo[22].name   			=	"shuttle";
+		modelInfo[22].baseOccupation	=	Universe.CT_TRANSPORT;
       
-		ModInfo[23].Name   			=	"sidewinder";
-      ModInfo[23].BaseOccupation	=	Universe.CT_PIRATE;
+		modelInfo[23].name   			=	"sidewinder";
+		modelInfo[23].baseOccupation	=	Universe.CT_PIRATE;
       
-		ModInfo[24].Name   			=	"splinter";
+		modelInfo[24].name   			=	"splinter";
       
-		ModInfo[25].Name   			=	"tharglet";
-      ModInfo[25].BaseOccupation	=	Universe.CT_KILLER;
+		modelInfo[25].name   			=	"tharglet";
+		modelInfo[25].baseOccupation	=	Universe.CT_KILLER;
       
-		ModInfo[26].Name   			=	"thargoid";
-      ModInfo[26].BaseOccupation	=	Universe.CT_KILLER;
+		modelInfo[26].name   			=	"thargoid";
+		modelInfo[26].baseOccupation	=	Universe.CT_KILLER;
       
-		ModInfo[27].Name   			=	"transporter";
-      ModInfo[27].BaseOccupation	=	Universe.CT_TRANSPORT;
+		modelInfo[27].name   			=	"transporter";
+		modelInfo[27].baseOccupation	=	Universe.CT_TRANSPORT;
       
-		ModInfo[28].Name   			=	"viper";
-      ModInfo[28].BaseOccupation	=	Universe.CT_POLICE;
+		modelInfo[28].name   			=	"viper";
+		modelInfo[28].baseOccupation	=	Universe.CT_POLICE;
       
-		ModInfo[29].Name   			=	"worm";
-      ModInfo[29].BaseOccupation	=	Universe.CT_TRANSPORT;
+		modelInfo[29].name   			=	"worm";
+		modelInfo[29].baseOccupation	=	Universe.CT_TRANSPORT;
 	}           
 }

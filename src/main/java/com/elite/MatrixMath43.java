@@ -136,7 +136,7 @@ class	MatrixMath43
 	}
 	 
 	// Rotation about a general vector (axis of rotation)
-	public void	rotateAbout(Vectr l, float a)
+	public void	rotateAbout(Vector l, float a)
 	{
 		MatrixMath43	mI		=	new MatrixMath43(),
 					mL		=	new MatrixMath43(),
@@ -179,7 +179,7 @@ class	MatrixMath43
 	public void mul(MatrixMath43 mat)
 	{
 		MatrixMath43 m = new MatrixMath43();
-		Vectr		v = new Vectr();
+		Vector		v = new Vector();
 		
 		m.copy(this);
 		

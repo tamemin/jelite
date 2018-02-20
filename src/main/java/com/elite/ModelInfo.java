@@ -18,29 +18,21 @@ package com.elite;
  ***************************************************************************/
 // Class for model infomation
 
-import java.awt.*;
-import java.util.*;
 
-class ModelInfo
-{
-	// Model info/data
-	public String	Name;
+class ModelInfo {
 
-   public int	Type;
-   public int	BaseOccupation;
-   public int	ActualOccupation;
-   public int	Alignment;
+   public String name;
+   public int	type;
+   public int	baseOccupation;
+   public int	actualOccupation;
+   public int	alignment;
    
-   // 
-   
-	ModelInfo()
-	{
-   	Name	=	null;
-
-      Type				   =	0;
-      BaseOccupation	   =	0;
-      ActualOccupation	=	0;
-      Alignment			=	0;
+	public ModelInfo() {
+	   	name = null;
+		type  =	0;
+		baseOccupation = 0;
+		actualOccupation = 0;
+		alignment =	0;
 	}
 }
 

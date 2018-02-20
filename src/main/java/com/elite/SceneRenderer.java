@@ -22,71 +22,69 @@ package com.elite;
 // and will run on it's own thread
 
 import java.awt.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import java.applet.Applet;
-import java.awt.image.ColorModel;
-import java.awt.image.MemoryImageSource;
+import java.awt.image.BufferedImage;
 
 
 
-class SceneRenderer implements Runnable
-{
-	boolean		paintRequested,
-					Running;
+class SceneRenderer implements Runnable {
+		
+	// Pure render variables
+	
+	Graphics onscreen;
+	Image offscreen;
+	Graphics graphics;	
+	boolean paintRequested;
+	boolean Running;
 
-// Static render value
-	public final static int SCREEN_WIDTH	=	640;
-	public final static int SCREEN_HEIGHT	=	480;
+	// Static render value
+	public final static int SCREEN_WIDTH	=	800;
+	public final static int SCREEN_HEIGHT	=	600;
 	public final static int SCREEN_CEN_X	=	(SCREEN_WIDTH/2);
 	public final static int SCREEN_CEN_Y	=	(SCREEN_HEIGHT/2);
 
-// Pure render variables
-	static	Image			offscreen;
-	static 	Graphics		graphics;
-	static	Applet		App;
-
 	// List control
-	static	Objct			pobjList;
+	static	LinkableObject			pobjList;
 	static	Object3D			objList[]	=	new Object3D[2];
 	static	Object3D			objFree		=	new Object3D();
 	static	Object3D			objects[]	=	new Object3D[2 * GameControl.MAX_DYNAMIC_OBJS];
 	
 	Camera	camera	=	new Camera();
 
-	Vectr		Light	=	new Vectr(0.7f, 0.7f, 0);
+	Vector		Light	=	new Vector(0.7f, 0.7f, 0);
 
 	Polygon		poygonArray[]		=	new Polygon[GameControl.NUM_Z_BUCKETS];
 	Polygon		polygon		=	new Polygon();
 	
-	Vectr		star[]		=	new Vectr[GameControl.NUM_STARS];
-	Vectr		star_rel[]	=	new Vectr[GameControl.NUM_STARS_REL];
+	Vector		star[]		=	new Vector[GameControl.NUM_STARS];
+	Vector		star_rel[]	=	new Vector[GameControl.NUM_STARS_REL];
 	
-// Mr Universe & friend
+	// Mr Universe & friend
 	Universe	Uni;
 	ShipSimulator	Ship;
 	
-// Misc
+	// Misc
 	Ticker	Mess1	=	new Ticker();
 	int		t	=	0;
 				
-	SceneRenderer()
-	{
+	SceneRenderer() {
 		paintRequested	=	false;
 		Running			=	true;
 	}
 	
-	public void initialise(Applet app, Universe uni)
-	{
+	public void initialise(Graphics gcd, Universe uni) {
+		
+		this.onscreen = gcd;
 		int	i;
 		
 		Uni	=	uni;
-		App	=	app;
 		
-		offscreen = app.createImage(SCREEN_WIDTH, SCREEN_HEIGHT);
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		
+		offscreen = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT,BufferedImage.TYPE_INT_RGB);
+
+		
 		if(graphics!=null) graphics.dispose();
+		
 		graphics = offscreen.getGraphics();
 
 		for(i=0; i!=GameControl.NUM_Z_BUCKETS; i++)
@@ -101,14 +99,14 @@ class SceneRenderer implements Runnable
 		
 		for(i=0; i!=GameControl.NUM_STARS; i++)
 		{
-			star[i]	=	new Vectr(	(float)((Math.random()-0.5)*10000),
+			star[i]	=	new Vector(	(float)((Math.random()-0.5)*10000),
 										(float)((Math.random()-0.5)*10000),
 										(float)((Math.random()-0.5)*10000));
 		}
 		
 		for(i=0; i!=GameControl.NUM_STARS_REL; i++)
 		{
-			star_rel[i]	=	new Vectr(	(float)(Math.random()*32000)-16000,
+			star_rel[i]	=	new Vector(	(float)(Math.random()*32000)-16000,
 											(float)(Math.random()*32000)-16000,
 											(float)(Math.random()*32000)-16000);
 		}
@@ -127,55 +125,46 @@ class SceneRenderer implements Runnable
 	}
 
 
-	public void rePaint(Camera cam, Objct pobjList)
-	{
+	public void rePaint(Camera cam, LinkableObject pobjList) {
 		if(paintRequested || cam==null)
 			return;
 
 		camera.copy(cam);
+		this.pobjList	=	pobjList;
+		paintWorld();
 
-		if(GameControl.bIE5mode)
-		{
-			this.pobjList	=	pobjList;
-			paintWorld();
-		}
-		else
-		{			
+	
+		/*			
 			Objct	p;
 		
 			p	=	objList[0].Next;
-			while(p!=null)
-			{
+			while(p!=null) {
 				Objct pN	=	p.Next;
 				p.linkTo(objFree);
 				p	=	pN;
 			}
 		
-			if(pobjList!=null)
-			{
+			if(pobjList!=null) {
 				p	=	pobjList.Next;
 				
-				while(p != null)
-				{
+				while(p != null) {
 					Object3D	o	=	(Object3D)p,
 							d	=	(Object3D)objFree.Next;
 					
-					if(d!=null)
-					{
-	//					d.unlink();
+					if(d!=null) {
 						d.dupe(o);
 						d.linkTo(objList[0]);
 					}
 					
 					p	=	p.Next;
 				}
-			}
-			
-			// this.pobjList	=	pobjList;
-			this.pobjList	=	objList[0];
-			
+			}		
+			this.pobjList	=	objList[0];	
 			paintRequested	=	true;
 		}
+		*/
+		
+		
 	}
 
 
@@ -190,8 +179,7 @@ class SceneRenderer implements Runnable
 	}
 
 // Do the biz
-	public void run()
-	{
+	public void run() {
 		do	{
 			while(!paintRequested && Running)
 			{
@@ -212,20 +200,18 @@ class SceneRenderer implements Runnable
 	}
 
 
-	public void paintWorld()
-	{
+	public void paintWorld() {
+		
 		t++;
-
-   	graphics.setColor(Color.black);
-	   graphics.fillRect(0,0, SCREEN_WIDTH,SCREEN_HEIGHT);
-
-   	doMain(Ship);
-
+	   	graphics.setColor(Color.black);
+		graphics.fillRect(0,0, SCREEN_WIDTH,SCREEN_HEIGHT);
+	   	doMain(Ship);
 		graphics.setColor(new Color(128,128,0));
 		graphics.drawRect(0,0, SCREEN_WIDTH-1,SCREEN_HEIGHT-1);
-		
-	   App.repaint();
+		onscreen.drawImage(offscreen, 0, 0, null);
 	}
+	
+
 
 
 	public void doMain(ShipSimulator s)
@@ -278,7 +264,7 @@ class SceneRenderer implements Runnable
 				{
 					drawStars();
 					
-					drawBodies(Uni.Bodies);
+					drawBodies(Uni.bodies);
 					
 					drawPart();
 					
@@ -332,7 +318,7 @@ class SceneRenderer implements Runnable
 				s.iView	=	1;
 				
 				drawStars();
-				drawBodies(Uni.Bodies);
+				drawBodies(Uni.bodies);
 					
 				if(pobjList != null)
 				{
@@ -366,13 +352,13 @@ class SceneRenderer implements Runnable
 
 	private	void	drawStars()
 	{
-		Vectr	v	=	new Vectr();
+		Vector	v	=	new Vector();
 		
 		graphics.setColor(Color.white);
 		for(int i=0; i!=GameControl.NUM_STARS; i++)
 		{
 			v.copy(star[i]);
-			v.mul(camera.Mat);
+			v.mul(camera.matrix);
 			v.pers();
 			
 			graphics.fillRect(v.sX,v.sY, 1,1);
@@ -386,7 +372,7 @@ class SceneRenderer implements Runnable
 			
 			v.copy(star_rel[i]);
 			
-			v.sub(camera.Position);
+			v.sub(camera.position);
 			
 			x	=	(int)v.x;
 			y	=	(int)v.y;
@@ -409,7 +395,7 @@ class SceneRenderer implements Runnable
 			v.y	=	y;
 			v.z	=	z;
 			
-			v.mul(camera.Mat);
+			v.mul(camera.matrix);
 			
 			if(v.z<GameControl.PERSPECTIVE_H/2)
 			{
@@ -447,9 +433,9 @@ class SceneRenderer implements Runnable
 //		graphics.drawString("Parts:"+i, 10,50);
 	}	
 
-	private	void	drawBodies(Objct	Bodies)
+	private	void	drawBodies(LinkableObject	Bodies)
 	{
-		Objct	p	=	Bodies.Next;
+		LinkableObject	p	=	Bodies.Next;
 		
 		while(p!=null) {
 			
@@ -465,12 +451,12 @@ class SceneRenderer implements Runnable
 					
 					if(Poly != null)
 					{
-						Vectr	v	=	new Vectr(((Object3D)p).Position);
-						v.sub(camera.Position);
-						v.mul(camera.Mat);
+						Vector	v	=	new Vector(((Object3D)p).position);
+						v.sub(camera.position);
+						v.mul(camera.matrix);
 						if(v.z>GameControl.PERSPECTIVE_H/2)
 						{
-							int	Size	=	(int)(((Object3D)p).Size * GameControl.PERSPECTIVE_H/v.z)/2;
+							int	Size	=	(int)(((Object3D)p).size * GameControl.PERSPECTIVE_H/v.z)/2;
 							int	iOT	=	v.pers();
 							
 							if(Size>1000)
@@ -481,7 +467,7 @@ class SceneRenderer implements Runnable
 							
 							Poly.x[1]	=	Poly.y[1]	=	Size;
 							
-							Poly.c			=	((Object3D)p).Colour;
+							Poly.c			=	((Object3D)p).colour;
 							Poly.iNSides	=	1;
 							Poly.linkTo(this.poygonArray[iOT]);
 						}
@@ -501,24 +487,24 @@ class SceneRenderer implements Runnable
 
 		s.run();
 
-		m.copy(s.Mat);
-		m.trans(	s.Position.x-camera.Position.x,
-					s.Position.y-camera.Position.y,
-					s.Position.z-camera.Position.z);
+		m.copy(s.matrix);
+		m.trans(	s.position.x-camera.position.x,
+					s.position.y-camera.position.y,
+					s.position.z-camera.position.z);
 		
-		m.mul(camera.Mat);
+		m.mul(camera.matrix);
 		
 		// Calculate pos relative to cam for radar AND occlusion purposes
-		s.RenderPos.set(0f,0f,0f);
-		s.RenderPos.mul(m);
+		s.renderPos.set(0f,0f,0f);
+		s.renderPos.mul(m);
 		
-		boolean occlude	=	fovClip(s.RenderPos);
+		boolean occlude	=	fovClip(s.renderPos);
 
 		if(!occlude)
 		{
-			ModelThreeD mod	=	s.mod();
+			ModelThreeD mod	=	s.getModel();
 
-			mod.render(poygonArray, polygon, Light, m, s.Col);
+			mod.render(poygonArray, polygon, Light, m, s.col);
 				
 			if(GameControl.bBounding)
 				mod.renderBounds(graphics, m);
@@ -536,42 +522,42 @@ class SceneRenderer implements Runnable
 			if(GameControl.bDebug)
 			{
 				//graphics.drawString("Ship "+iCount+":"+s+":@ "+s.Position.x+","+s.Position.y+","+s.Position.z, 10,iCount*15+120);
-        graphics.drawString("Ship "+iCount+" ZPOS"+s.Position.z,10,iCount*15+120);
+        graphics.drawString("Ship "+iCount+" ZPOS"+s.position.z,10,iCount*15+120);
 				iCount++;
 			}
 								
-			m.copy(s.Mat);
-			m.trans(	s.Position.x-camera.Position.x,
-						s.Position.y-camera.Position.y,
-						s.Position.z-camera.Position.z);
+			m.copy(s.matrix);
+			m.trans(	s.position.x-camera.position.x,
+						s.position.y-camera.position.y,
+						s.position.z-camera.position.z);
 			
-			m.mul(camera.Mat);
+			m.mul(camera.matrix);
 			
 			// Calculate pos relative to cam for radar AND occlusion purposes
-			s.RenderPos.set(0f,0f,0f);
-			s.RenderPos.mul(m);
+			s.renderPos.set(0f,0f,0f);
+			s.renderPos.mul(m);
 			
 			
 			boolean occlude;
 			
 			if(s == Uni.ShipPlayer[0])		occlude	=	true;
 			else
-				occlude	=	fovClip(s.RenderPos);
+				occlude	=	fovClip(s.renderPos);
 			if(!occlude) // Objects are not in field of vision (i.e. behind you)
 			{
-				ModelThreeD mod	=	s.mod();
+				ModelThreeD mod	=	s.getModel();
 
-				s.RenderPos.pers();
+				s.renderPos.pers();
 					
-				if(s.RenderPos.z > 20000)
+				if(s.renderPos.z > 20000)
 				{
 					// So far away, just draw a dot
-					graphics.setColor(s.Colour);
-					graphics.fillRect(s.RenderPos.sX,s.RenderPos.sY, 2,2);
+					graphics.setColor(s.colour);
+					graphics.fillRect(s.renderPos.sX,s.renderPos.sY, 2,2);
 				}
 				else
 				{
-					mod.render(poygonArray, polygon, Light, m, s.Col);
+					mod.render(poygonArray, polygon, Light, m, s.col);
 					
 					if(GameControl.bBounding)
 						mod.renderBounds(graphics, m);
@@ -581,8 +567,8 @@ class SceneRenderer implements Runnable
 				ShipSimulator s2	=	(ShipSimulator) s;
 				if(!s2.PlayerCraft && s2.bShoot && s2.sBest!=null)
 				{
-					graphics.setColor(s.Colour);
-					graphics.drawLine(s.RenderPos.sX,s.RenderPos.sY,
+					graphics.setColor(s.colour);
+					graphics.drawLine(s.renderPos.sX,s.renderPos.sY,
 											SCREEN_CEN_X+(int)(SCREEN_CEN_X*Math.random()),
 											SCREEN_CEN_Y+(int)(SCREEN_CEN_Y*Math.random()));
 				}
@@ -668,7 +654,7 @@ class SceneRenderer implements Runnable
 		{
 			graphics.fillRect((int)Uni.planets[i].sPos.x, (int)Uni.planets[i].sPos.z, 2,2);
 			
-			d	=	Utils.SQR((int)Uni.planets[i].sPos.x - Uni.MouseX) + Utils.SQR((int)Uni.planets[i].sPos.z-Uni.MouseY);
+			d	=	Utils.SQR((int)Uni.planets[i].sPos.x - Uni.mouseX) + Utils.SQR((int)Uni.planets[i].sPos.z-Uni.mouseY);
 			if(d<BestDistance)
 			{
 				BestPlanet		=	i;
@@ -691,8 +677,8 @@ class SceneRenderer implements Runnable
 		{
 			graphics.drawString("Distance:"+ s.SelectedPlanet.distanceFrom(s.CurrentPlanet), 32,20);
 		}
-		graphics.drawString(GameControl.MISC[6] +" "+ s.CurrentPlanet.Name, 32,GameControl.SCREEN_HEIGHT-10);
-		Utils.drawStringCentre(graphics, GameControl.MISC[7] +" "+ s.SelectedPlanet.Name, GameControl.SCREEN_HEIGHT-10);
+		graphics.drawString(GameControl.MISC[6] +" "+ s.CurrentPlanet.name, 32,GameControl.SCREEN_HEIGHT-10);
+		Utils.drawStringCentre(graphics, GameControl.MISC[7] +" "+ s.SelectedPlanet.name, GameControl.SCREEN_HEIGHT-10);
 	}
 
 	private	void	drawLocal(ShipSimulator s)
@@ -741,7 +727,7 @@ class SceneRenderer implements Runnable
 
 				graphics.fillRect(x,y, 2,2);
 				
-				d	=	Utils.SQR(x-Uni.MouseX) + Utils.SQR(y-Uni.MouseY);
+				d	=	Utils.SQR(x-Uni.mouseX) + Utils.SQR(y-Uni.mouseY);
 				if(d<BestDistance)
 				{
 					BestPlanet		=	i;
@@ -773,8 +759,8 @@ class SceneRenderer implements Runnable
 		{
 			graphics.drawString("Distance:"+ s.SelectedPlanet.distanceFrom(s.CurrentPlanet), 32,20);
 		}
-		graphics.drawString(GameControl.MISC[6] +" "+ s.CurrentPlanet.Name, 32,GameControl.SCREEN_HEIGHT-10);
-		Utils.drawStringCentre(graphics, GameControl.MISC[7] +" "+ s.SelectedPlanet.Name, GameControl.SCREEN_HEIGHT-10);
+		graphics.drawString(GameControl.MISC[6] +" "+ s.CurrentPlanet.name, 32,GameControl.SCREEN_HEIGHT-10);
+		Utils.drawStringCentre(graphics, GameControl.MISC[7] +" "+ s.SelectedPlanet.name, GameControl.SCREEN_HEIGHT-10);
 	}
 
 	private	void	drawPlanetData(ShipSimulator s)
@@ -783,7 +769,7 @@ class SceneRenderer implements Runnable
 		Planet	p	=	s.SelectedPlanet;
 
 		graphics.setColor(Color.white);
-		graphics.drawString(GameControl.MISC[9]+" "+p.Name+"  ("+GameControl.COLOURS[p.iPlanetC]+")", 100,60);
+		graphics.drawString(GameControl.MISC[9]+" "+p.name+"  ("+GameControl.COLOURS[p.iPlanetC]+")", 100,60);
 
 		graphics.setColor(Color.lightGray);
 		y	=	92;
@@ -825,7 +811,7 @@ class SceneRenderer implements Runnable
 			{
 				if(Station.numAvailable[i] == 0)
 					graphics.setColor(Color.darkGray);
-				else if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+				else if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 				{
 					graphics.setColor(Color.red);
 				}
@@ -835,7 +821,7 @@ class SceneRenderer implements Runnable
 			else
 			 	graphics.setColor(Color.lightGray);
 			 	
-			if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+			if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
          	Sel	=	i;
 			
 			graphics.drawString(""+Station.numAvailable[i], 100,y);
@@ -846,7 +832,7 @@ class SceneRenderer implements Runnable
 			{
 				if(s.Cargo[i] == 0)
 					graphics.setColor(Color.darkGray);
-				else if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+				else if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 					graphics.setColor(Color.red);
 				else
 					graphics.setColor(Color.lightGray);
@@ -992,7 +978,7 @@ class SceneRenderer implements Runnable
 		{
 			if(GameControl.UPTECH[i] <= Tech)
 			{
-				if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+				if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 				{
 					graphics.setColor(Color.red);
 					Item	=	i;
@@ -1010,7 +996,7 @@ class SceneRenderer implements Runnable
 		{
 			if(GameControl.UPTECH[i] <= Tech)
 			{
-				if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+				if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 				{
 					graphics.setColor(Color.red);
 					Item	=	i;
@@ -1062,7 +1048,7 @@ class SceneRenderer implements Runnable
 				
 				if(Uni.EquipItem>3)
 				{
-					if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+					if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 					{
 						graphics.setColor(Color.red);
 						if(Uni.MouseClick)
@@ -1117,7 +1103,7 @@ class SceneRenderer implements Runnable
 					
 					for(int i=0; i!=4; i++)
 					{
-						if(Uni.MouseY>= y-10 && Uni.MouseY<=y)
+						if(Uni.mouseY>= y-10 && Uni.mouseY<=y)
 						{
 							graphics.setColor(Color.red);
 							if(Uni.MouseClick)
@@ -1207,8 +1193,8 @@ class SceneRenderer implements Runnable
 		
 		int	x,y;
 
-		Vectr	v	=	new Vectr(s.CurrentPlanet.Position);
-		v.sub(camera.Position);
+		Vector	v	=	new Vector(s.CurrentPlanet.position);
+		v.sub(camera.position);
 		
 		x=8;y=SCREEN_HEIGHT-106;
 		drawStatBox(x, y, s.FrontShields, s.FrontShieldsMax);
@@ -1443,8 +1429,8 @@ class SceneRenderer implements Runnable
 		drawO(x,y, (int)(Width*.25), (int)(Height*.25));
 
 		// Do radar relative to ship, not view
-		MatrixMath43	mat	=	new MatrixMath43(ShipPlayer.Mat);
-		Vectr		v		=	new Vectr();
+		MatrixMath43	mat	=	new MatrixMath43(ShipPlayer.matrix);
+		Vector		v		=	new Vector();
 		mat.affineInverse();
 		
 		if(pobjList != null)
@@ -1452,8 +1438,8 @@ class SceneRenderer implements Runnable
 			Object3D	s	=	(Object3D) pobjList.Next;
 			while(s!=null)
 			{
-				v.copy(s.Position);
-				v.sub(ShipPlayer.Position);
+				v.copy(s.position);
+				v.sub(ShipPlayer.position);
 	
 				if(v.size()<lim)
 				{
@@ -1462,7 +1448,7 @@ class SceneRenderer implements Runnable
 					int	x2	=	(int)(x+v.x/Scale),
 							y2	=	(int)(y-v.z/(Scale*2));
 				
-					graphics.setColor(s.Colour);
+					graphics.setColor(s.colour);
 		
 					graphics.drawLine(x2,y2, x2,(int)(y2-v.y/(Scale*2)));
 					graphics.fillRect(x2,(int)(y2-v.y/(Scale*2)), 3,3);
@@ -1472,15 +1458,15 @@ class SceneRenderer implements Runnable
 			}
 		}
 
-		Objct	p	=	Uni.Bodies.Next;
+		LinkableObject	p	=	Uni.bodies.Next;
 		while(p!=null)
 		{
 			if(p.type == Uni.OBJ_STATION)
 			{
 				StationModel Station	=	(StationModel) p;
 				
-				v.copy(Station.Position);
-				v.sub(ShipPlayer.Position);
+				v.copy(Station.position);
+				v.sub(ShipPlayer.position);
 				if(v.size()<lim)
 				{
 					v.mul(mat);
@@ -1488,7 +1474,7 @@ class SceneRenderer implements Runnable
 					int	x2	=	(int)(x+v.x/Scale),
 							y2	=	(int)(y-v.z/(Scale*2));
 				
-					graphics.setColor(Station.Colour);
+					graphics.setColor(Station.colour);
 		
 					graphics.drawLine(x2,y2, x2,(int)(y2-v.y/(Scale*2)));
 					graphics.fillRect(x2,(int)(y2-v.y/(Scale*2)), 3,3);
@@ -1518,16 +1504,16 @@ class SceneRenderer implements Runnable
 		graphics.fillRect(x+Size/2,y+3*Size/4, 1,1);
 		
 		
-		MatrixMath43	mat	=	new MatrixMath43(ShipPlayer.Mat);
+		MatrixMath43	mat	=	new MatrixMath43(ShipPlayer.matrix);
 		mat.affineInverse();
 		
 		
-		Vectr	v	=	new Vectr();
+		Vector	v	=	new Vector();
 		
 		if(ShipPlayer.bStation)
 		{
-			v.copy(Uni.Station.Position);		//Naughty
-			v.sub(ShipPlayer.Position);
+			v.copy(Uni.Station.position);		//Naughty
+			v.sub(ShipPlayer.position);
 			v.mul(mat);
 	      
 	      if(v.z<0)
@@ -1540,15 +1526,15 @@ class SceneRenderer implements Runnable
 		}
 		else
 		{
-			v.copy(ShipPlayer.CurrentPlanet.Position);
-			v.sub(ShipPlayer.Position);
+			v.copy(ShipPlayer.CurrentPlanet.position);
+			v.sub(ShipPlayer.position);
 			v.mul(mat);
 	      
 	      if(v.z<0)
 	      {
 				graphics.setColor(Color.red);
-				v.copy(Uni.Sun.Position);			//Naughty
-				v.sub(ShipPlayer.Position);
+				v.copy(Uni.Sun.position);			//Naughty
+				v.sub(ShipPlayer.position);
 				v.mul(mat);
 			}
 			else
@@ -1565,7 +1551,7 @@ class SceneRenderer implements Runnable
 	}
  
 // Field of vision, determine whether object is visible to the camera 	
-	public	static	boolean	fovClip(Vectr Pos)
+	public	static	boolean	fovClip(Vector Pos)
 	{ 	
  		boolean occlude	=	false;
 		if(Pos.z < GameControl.PERSPECTIVE_H/2)		occlude = true;

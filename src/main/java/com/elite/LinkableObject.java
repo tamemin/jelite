@@ -25,14 +25,14 @@ import java.net.*;
 import java.util.*;
 
 
-class Objct
+class LinkableObject
 {
 	int	type;
 	
-	Objct	Next;
-	Objct	Prev;
+	LinkableObject	Next;
+	LinkableObject	Prev;
 	
-	Objct()
+	LinkableObject()
 	{
 		type	=	0;
 		Next	=	null;
@@ -40,7 +40,7 @@ class Objct
 	}
 	
 	
-   public void linkTo(Objct p)
+   public void linkTo(LinkableObject p)
    {
       if(this.Next!=null || this.Prev!=null)    this.unlink();
       if(p == null)   return;

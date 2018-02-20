@@ -42,8 +42,8 @@ class StationModel extends Object3D
 	{
 		type	=	Universe.OBJ_STATION;
 
-		Colour	=	Color.lightGray;
-		Col		=	7;
+		colour	=	Color.lightGray;
+		col		=	7;
 
 		priceModifiers[0]		=	AGRI;		//	Food
 		priceModifiers[1]		=	AGRI;    //	Textiles
@@ -105,8 +105,8 @@ class StationModel extends Object3D
 		float	M,
 				Mod;
 		
-		Position.copy(p.Position);
-		Position.z	-=	p.Size + 10000;
+		position.copy(p.position);
+		position.z	-=	p.size + 10000;
 
 		for(int i=0; i!=GameControl.NUM_PRODUCTS; i++)
 		{
@@ -157,11 +157,11 @@ class StationModel extends Object3D
    {
    	MatrixMath43	m	=	new MatrixMath43();
    					
-   	Vectr		thrust	=	new Vectr();
+   	Vector		thrust	=	new Vector();
 
 		thrust.set(0f,0f,1f);
-		thrust.mul(Mat);
+		thrust.mul(matrix);
 		m.rotateAbout(thrust, (float)(-Math.PI/270));
-		Mat.mul(m);
+		matrix.mul(m);
    }
 }

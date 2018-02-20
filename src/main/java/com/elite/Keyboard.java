@@ -59,7 +59,7 @@ class Keyboard
 		iView		=	1;
 	}
 
-	public void Down(int key)
+	public void down(int key)
 	{
 		if(key>='0' && key<='9')
 		{
@@ -137,7 +137,7 @@ class Keyboard
 		}
 	}
 	
-	public void Up(int key)
+	public void up(int key)
 	{
 	   switch(key)
 	   {

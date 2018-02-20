@@ -20,26 +20,21 @@ package com.elite;
 
 import java.awt.*;
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 
-class ModelThreeD
-{
-   private  ModelThreeD   Next;
-   private  ModelThreeD   Prev;
+class ModelThreeD {
 
 	private	int	iNFaces, iNVecs;
 
-	private	URL 						url;
 	private	BufferedInputStream	bufferIn;
 
-	private	Vector	faces	=	new Vector();
-	private	Vector	vecs	=	new Vector();
+	private	ArrayList<Face>	faces	=	new ArrayList<Face>();
+	private	ArrayList<Vector> vecs	=	new ArrayList<Vector>();
 
 	// Bounds
-	public	Vectr	Max	=	new Vectr();
-	public	Vectr	Min	=	new Vectr();
+	public	Vector	Max	=	new Vector();
+	public	Vector	Min	=	new Vector();
 
 // File loading state statics
 	private final int	LOAD_NOTHING	=	0,
@@ -51,35 +46,31 @@ class ModelThreeD
                      LOAD_NORMAL		=	6,
 							LOAD_END			=	10;
 
-   ModelThreeD()
-   {
+   public ModelThreeD() {
 		iNFaces	=	0;
 		iNVecs	=	0;
-
-      Next  =  null;
-      Prev  =  null;
    }
 
 	public	void	addVec(float x, float y, float z)
 	{
-		vecs.addElement(new Vectr(x,y,z));
+		vecs.add(new Vector(x,y,z));
 		iNVecs++;
 	}
 
 	public	void	addFace(int v0, int v1, int v2, int v3)
 	{
-		faces.addElement(new Face(v0,v1,v2,v3));
+		faces.add(new Face(v0,v1,v2,v3));
 		iNFaces++;
 	}
 
-   public void addFace(Color c, Vectr normal, int i[])
+   public void addFace(Color c, Vector normal, int i[])
 	{
    	Face f	=	new Face(i);
 
       f.normal.copy(normal);
       f.c	=	c;
       
-		faces.addElement(f);
+		faces.add(f);
 		iNFaces++;
 	}
     
@@ -95,33 +86,29 @@ class ModelThreeD
 		return(iNFaces);
 	}
 
-	public Vectr vec(int i)
+	public Vector vec(int i)
 	{
-		return((Vectr) vecs.elementAt(i));
+		return((Vector) vecs.get(i));
 	}
 
-	public Vectr vec(int i, int j)
+	public Vector vec(int i, int j)
 
 	{
-		return((Vectr) vecs.elementAt(face(i).v[j]));
+		return((Vector) vecs.get(face(i).v[j]));
 	}
 
 	public Face	face(int i)
 	{
-		return((Face) faces.elementAt(i));
+		return((Face) faces.get(i));
 	}
 
-	public	boolean	load(URL codebase, String filename)
+	public	boolean	load(InputStream is)
 	{
 		boolean					flag;
 
 		flag	=	true;
 	
-		try {	
-			url 		= new URL(codebase, filename);
-			bufferIn = new BufferedInputStream(url.openStream());
-			}
-		catch(IOException e) {System.out.println("IOE"+e);}
+		bufferIn = new BufferedInputStream(is);
 	
 
 		if(flag)
@@ -137,7 +124,7 @@ class ModelThreeD
 			char		c;
 
          int	r=0,g=0,b=0;
-         Vectr	normal	=	new Vectr();
+         Vector	normal	=	new Vector();
          
 			String	str = new String();
 
@@ -323,15 +310,15 @@ class ModelThreeD
 			}
 
 			//	Might as well create some face normals
-			Vectr v[]	= new Vectr[2];
+			Vector v[]	= new Vector[2];
 			
 			for(int iF=0; iF!=iNFaces; iF++)
 			{
-				v[0]	=	new Vectr( vec(iF,1).x - vec(iF,0).x,
+				v[0]	=	new Vector( vec(iF,1).x - vec(iF,0).x,
 										vec(iF,1).y - vec(iF,0).y,
 										vec(iF,1).z - vec(iF,0).z);
 				
-				v[1]	=	new Vectr( vec(iF,2).x - vec(iF,0).x,
+				v[1]	=	new Vector( vec(iF,2).x - vec(iF,0).x,
 										vec(iF,2).y - vec(iF,0).y,
 										vec(iF,2).z - vec(iF,0).z);
 				
@@ -355,11 +342,11 @@ class ModelThreeD
 	
 	
 	// Draw object into order table
-	public void render(Polygon OrderTable[], Polygon PolyFree, Vectr light, MatrixMath43 m, int col)
+	public void render(Polygon OrderTable[], Polygon PolyFree, Vector light, MatrixMath43 m, int col)
 	{
 		MatrixMath43	m2 = new MatrixMath43();
-		Vectr		v	= new Vectr(),
-      			v2	= new Vectr();
+		Vector		v	= new Vector(),
+      			v2	= new Vector();
 		int		iot = 0;
 
 	// Can now use m2 for lighting purposes
@@ -375,8 +362,8 @@ class ModelThreeD
 		{
       	int	i	=	this.iNFaces-count-1;
       
-			int	x[] = new int[Face.MAX_V],
-					y[] = new int[Face.MAX_V];
+			int	x[] = new int[Face.MAX_V];
+			int	y[] = new int[Face.MAX_V];
                
 			Polygon	p	=	PolyFree.Next;
 		
@@ -460,19 +447,19 @@ class ModelThreeD
 
 	public void renderBounds(Graphics g, MatrixMath43 m)
 	{
-		Vectr	av[] = new Vectr[8];
+		Vector	av[] = new Vector[8];
 		int	x[] = new int[4],
 				y[] = new int[4];
 
-		av[0]	=	new Vectr(Min.x, Min.y, Min.z);
-		av[1]	=	new Vectr(Max.x, Min.y, Min.z);
-		av[2]	=	new Vectr(Min.x, Min.y, Max.z);
-		av[3]	=	new Vectr(Max.x, Min.y, Max.z);
+		av[0]	=	new Vector(Min.x, Min.y, Min.z);
+		av[1]	=	new Vector(Max.x, Min.y, Min.z);
+		av[2]	=	new Vector(Min.x, Min.y, Max.z);
+		av[3]	=	new Vector(Max.x, Min.y, Max.z);
 
-		av[4]	=	new Vectr(Min.x, Max.y, Min.z);
-		av[5]	=	new Vectr(Max.x, Max.y, Min.z);
-		av[6]	=	new Vectr(Min.x, Max.y, Max.z);
-		av[7]	=	new Vectr(Max.x, Max.y, Max.z);
+		av[4]	=	new Vector(Min.x, Max.y, Min.z);
+		av[5]	=	new Vector(Max.x, Max.y, Min.z);
+		av[6]	=	new Vector(Min.x, Max.y, Max.z);
+		av[7]	=	new Vector(Max.x, Max.y, Max.z);
 
 		av[0].mul(m);	av[1].mul(m);	av[2].mul(m);	av[3].mul(m);
 		av[4].mul(m);	av[5].mul(m);	av[6].mul(m);	av[7].mul(m);
